@@ -117,6 +117,49 @@ module VCAP::CloudController
       end
     end
 
+    describe '#can_create_revision' do
+      let!(:app_model) { AppModel.make(space: space, name: 'some-name', desired_state: ProcessModel::STARTED) }
+      let!(:process1) { ProcessModel.make(:process, app: app_model, type: 'web', command: 'webby') }
+      let!(:process2) { ProcessModel.make(:process, app: app_model, type: 'worker') }
+      let!(:droplet) { DropletModel.make(app: app_model, process_types: { 'web': 'webby' , 'worker': nil }) }
+
+      before do
+        app_model.update(revisions_enabled: true, droplet_guid: droplet.guid)
+      end
+
+      context 'when there are revisions associated with the app' do
+        let(:revision) { RevisionModel.make(app: app_model) }
+
+        context 'when droplet on the revision is older than the apps desired droplet' do
+
+        end
+
+        context 'when env vars on the revision are older than the apps env vars' do
+
+        end
+
+        context 'when commands on the revision are older than the apps env vars' do
+
+        end
+      end
+
+      context 'when there are no revisions associated with the app' do
+        it 'returns true' do
+          expect(app_model.can_create_revision?).to be_truthy
+        end
+      end
+
+      context 'when revisions are not enabled' do
+        before do
+          app_model.update(revisions_enabled: false)
+        end
+
+        it 'returns false' do
+          expect(app_model.can_create_revision?).to be_falsey
+        end
+      end
+    end
+
     describe '#staging_in_progress' do
       context 'when a build is in staging state' do
         let!(:build) { BuildModel.make(app_guid: app_model.guid, state: BuildModel::STAGING_STATE) }

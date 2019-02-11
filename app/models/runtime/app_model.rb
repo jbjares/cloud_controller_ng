@@ -135,6 +135,13 @@ module VCAP::CloudController
       revisions_enabled &&
         (droplet_guid != latest_revision&.droplet_guid ||
           environment_variables != latest_revision&.environment_variables)
+      #||
+       #   commands_by_process_type != latest_revision&.commands_by_process_type)
+    end
+
+
+    def commands_by_process_type
+      Hash[processes.map {|p| [p.type, p.command]}]
     end
 
     private
